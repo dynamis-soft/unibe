@@ -13,77 +13,36 @@ class Api extends REST_Controller {
     /* APIS GENERALES */
 
     public function huli_post() {
-        /*
-         * 
-         * 
-          {
-          "id": "evt_589c2fbbc62596f2e11ea6e77ed4cf03",
-          "type": "appointment.booked",
-          "data": {
-          "id": "apt_acbe8095f5353c89c62cba19c2596844",
-          "dateFrom": "2017-10-06T15:00:00",
-          "dateTo": "2017-10-06T16:00:00",
-          "status": "booked",
-          "user": {
-          "name": "Asistente Metropolitano"
-          },
-          "doctor": {
-          "name": "Julio Health",
-          "specialties": [
-          {
-          "name": "Cardiology"
-          },
-          {
-          "name": "Cardiothoracic Surgery"
-          }
-          ]
-          },
-          "clinic": {
-          "name": "Huli Clinic"
-          },
-          "patient": {
-          "email": "julio@huli.io",
-          "name": "Julio Health",
-          "phones": [
-          {
-          "iso2": "CR",
-          "number": "88888888",
-          "extension": "123",
-          "type": "home"
-          },
-          {
-          "iso2": "CR",
-          "number": "88888888",
-          "type": "mobile"
-          }
-          ],
-          "ids": [
-          {
-          "type": "identification",
-          "number": "1-2345-6789"
-          },
-          {
-          "type": "other",
-          "number": "CLI0001"
-          }
-          ],
-          "insurances": [
-          {
-          "name": "Medismart",
-          "number": "MED123"
-          }
-          ]
-          }
-          }
-          }
-         */
+        $data = $this->post();
+
+        $telefonos = "";
+        foreach ($data['data']['patient']['phones'] as $telefono) {
+            $telefonos .= " Tipo: " . $telefono['type'] . " " . $telefono['number'];
+        }
+        $enfermedades = "";
+        foreach ($data['data']['patient']['insurances'] as $enfermedad) {
+            $telefonos .= $enfermedad['name'] . " ";
+        }
+        $description = "Usuario :" . 'user ' . $data['data']['user']['name'] . ". Doctor: " . $data['data']['doctor']['name'] .
+                ". Clinica: " . $data['data']['clinic']['name'] . ". Paciente: " . $data['data']['patient']['name'] . " - " . $data['data']['patient']['email']
+                . " - " . $telefonos . ". Motivo: " . $enfermedades;
+        $xml = '<?xml version="1.0" encoding="utf-8"?>
+            <Deals>
+        <row no = "1">
+        <FL val = "Description">' . $description . '</FL>
+        <FL val = "Stage">Contacto Inicial</FL>
+        <FL val = "Deal Name">Cita Huli ' . $data['data']['patient']['name'] . '</FL> 
+        <FL val = "Closing Date">' . date('d/m/Y') . '</FL> 
+        </row>
+        </Deals>';
+        $result = $this->zoho->crearEvento($xml);
+        $result = simplexml_load_string($result);
 
         $message = [
             'type' => "success",
             'message' => "Operacion exitosa",
+            'data' => $result
         ];
-
-
         $this->set_response($message, REST_Controller::HTTP_CREATED);
     }
 
