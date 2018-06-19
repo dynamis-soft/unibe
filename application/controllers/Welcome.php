@@ -22,8 +22,8 @@ class Welcome extends CI_Controller {
     public function index() {
        //$user = $this->factura_model->getUser();
         //print_r($user); die();
-        $result = $this->zoho->buscarContacto("1-2345-6789");
-        print_r($result);
+        $current_timestamp = date('Y-m-d H:i:s');
+        $this->contacto_model->guardarContacto("Juan Rojas","88888888",$current_timestamp,"usuario@email.com","1-1111-1111");
         $this->load->view('welcome_message');
     }
 

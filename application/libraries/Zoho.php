@@ -37,7 +37,7 @@ class Zoho {
     function crearEvento($xml) {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/xml/Deals/insertRecords";
-        $param = "authtoken=" . TOKEN . "&scope=crmapi&xmlData=" . $xml;
+        $param = "authtoken=" . TOKEN . "&scope=crmapi&newFormat=1&xmlData=" . $xml;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -50,12 +50,45 @@ class Zoho {
         return $result;
     }
 
+     function buscarContacto() {
+        $token = "AUTHTOKEN";
+        $url = "https://crm.zoho.com/crm/private/xml/Contacts/getRecords";
+        $param = "authtoken=" . TOKEN . "&scope=crmapi&newFormat=1";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }    
+    
+    
+    function crearContacto($xml) {
+        $token = "AUTHTOKEN";
+        $url = "https://crm.zoho.com/crm/private/xml/Contacts/insertRecords";
+        $param = "authtoken=" . TOKEN . "&scope=crmapi&xmlData=" . $xml;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }    
+    
+    
 //https://crm.zoho.com/crm/private/json/Leads/getRecords?authtoken=Auth Token&scope=crmapi
     function getOpciones() {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/json/Leads/getRecords";
         $param = "authtoken=" . TOKEN . "&scope=crmapi&selectColumns=Deals(Stage)";
-        echo $url.$param;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);

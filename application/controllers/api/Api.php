@@ -16,9 +16,17 @@ class Api extends REST_Controller {
         $data = $this->post();
 
         $telefonos = "";
+        $home = "";
+        $mobile = "";
         if (array_key_exists('data', $data)) {
             foreach ($data['data']['patient']['phones'] as $telefono) {
                 $telefonos .= " Tipo: " . $telefono['type'] . " " . $telefono['number'];
+                if ($telefono['type'] == "home") {
+                    $home = $telefono['number'];
+                }
+                if ($telefono['type'] == "mobile") {
+                    $mobile = $telefono['number'];
+                }
             }
             $enfermedades = "";
             foreach ($data['data']['patient']['insurances'] as $enfermedad) {
@@ -27,16 +35,44 @@ class Api extends REST_Controller {
             $description = "Usuario :" . 'user ' . $data['data']['user']['name'] . ". Doctor: " . $data['data']['doctor']['name'] .
                     ". Clinica: " . $data['data']['clinic']['name'] . ". Paciente: " . $data['data']['patient']['name'] . " - " . $data['data']['patient']['email']
                     . " - " . $telefonos . ". Motivo: " . $enfermedades;
+            if (array_key_exists("ids", $data['data']['patient'])) {
+                foreach ($data['data']['patient']["ids"] as $item) {
+                    if ($item["type"] == "identification") {
+                        $result = $this->zoho->buscarContacto();
+                        if (strpos($result, $item["number"]) === false) {
+                            $xml = '<Contacts>
+                <row no="1">
+                <FL val="First Name"></FL>
+                <FL val="Last Name">' . $data['data']['patient']['name'] . '</FL>
+                <FL val="Email">' . $data['data']['patient']['email'] . '</FL>
+                <FL val="Número de ID">' . $item["number"] . '</FL>
+                <FL val="Phone">' . $home . '</FL>
+                <FL val="Mobile">' . $mobile . '</FL>
+                </row>
+                </Contacts>';
+                            $result = $this->zoho->crearContacto($xml);
+                            $current_timestamp = date('Y-m-d H:i:s');
+                            $this->contacto_model->guardarContacto($data['data']['patient']['name'],$mobile,$current_timestamp,$data['data']['patient']['email'],$item["number"]);
+                        }
+                    }
+                }
+            }
+            
             $xml = '<?xml version="1.0" encoding="utf-8"?>
                 <Deals>
                 <row no = "1">
                 <FL val = "Description">' . $description . '</FL>
-                <FL val = "Stage">Contacto Inicial</FL>
+                <FL val = "Stage">Solicitud de Cita</FL>
                 <FL val = "Deal Name">Cita Huli ' . $data['data']['patient']['name'] . '</FL> 
+                <FL val = "Contact Name">' . $data['data']['patient']['name'] . '</FL> 
                 <FL val = "Closing Date">' . date('d/m/Y') . '</FL> 
                 </row>
                 </Deals>';
             $result = $this->zoho->crearEvento($xml);
+
+
+            
+
             $result = simplexml_load_string($result);
             $message = [
                 'type' => "success",
@@ -50,6 +86,34 @@ class Api extends REST_Controller {
             ];
         }
 
+
+
+        $this->set_response($message, REST_Controller::HTTP_CREATED);
+    }
+
+    public function facturacion_post() {
+        $data = $this->post();
+        //log_message('error', 'Entre');
+        //log_message('error', json_encode($data));
+        $user = $this->factura_model->getUser();
+        $message = [
+            'type' => "error",
+            'message' => $user
+        ];
+
+
+        $this->set_response($message, REST_Controller::HTTP_CREATED);
+    }
+
+    public function producto_post() {
+        $data = $this->post();
+        //log_message('error', 'Entre');
+        //log_message('error', json_encode($data));
+        $user = $this->factura_model->getUser();
+        $message = [
+            'type' => "error",
+            'message' => $user
+        ];
 
 
         $this->set_response($message, REST_Controller::HTTP_CREATED);
