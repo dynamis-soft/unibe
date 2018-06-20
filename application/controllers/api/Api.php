@@ -52,12 +52,12 @@ class Api extends REST_Controller {
                 </Contacts>';
                             $result = $this->zoho->crearContacto($xml);
                             $current_timestamp = date('Y-m-d H:i:s');
-                            $this->contacto_model->guardarContacto($data['data']['patient']['name'],$mobile,$current_timestamp,$data['data']['patient']['email'],$item["number"]);
+                            $this->contacto_model->guardarContacto($data['data']['patient']['name'], $mobile, $current_timestamp, $data['data']['patient']['email'], $item["number"]);
                         }
                     }
                 }
             }
-            
+
             $xml = '<?xml version="1.0" encoding="utf-8"?>
                 <Deals>
                 <row no = "1">
@@ -71,7 +71,7 @@ class Api extends REST_Controller {
             $result = $this->zoho->crearEvento($xml);
 
 
-            
+
 
             $result = simplexml_load_string($result);
             $message = [
@@ -92,6 +92,20 @@ class Api extends REST_Controller {
     }
 
     public function facturacion_post() {
+        $data = $this->post();
+        //log_message('error', 'Entre');
+        //log_message('error', json_encode($data));
+        $user = $this->factura_model->getUser();
+        $message = [
+            'type' => "error",
+            'message' => $user
+        ];
+
+
+        $this->set_response($message, REST_Controller::HTTP_CREATED);
+    }
+
+    public function contacto_post() {
         $data = $this->post();
         //log_message('error', 'Entre');
         //log_message('error', json_encode($data));
