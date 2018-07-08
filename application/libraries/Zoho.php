@@ -66,7 +66,21 @@ class Zoho {
         return $result;
     }    
     
-    
+       function buscarContactoJson() {
+        $token = "AUTHTOKEN";
+        $url = "https://crm.zoho.com/crm/private/json/Contacts/getRecords";
+        $param = "authtoken=" . TOKEN . "&scope=crmapi";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }    
     function crearContacto($xml) {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/xml/Contacts/insertRecords";

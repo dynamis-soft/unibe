@@ -41,15 +41,15 @@ class Api extends REST_Controller {
                         $result = $this->zoho->buscarContacto();
                         if (strpos($result, $item["number"]) === false) {
                             $xml = '<Contacts>
-                <row no="1">
-                <FL val="First Name"></FL>
-                <FL val="Last Name">' . $data['data']['patient']['name'] . '</FL>
-                <FL val="Email">' . $data['data']['patient']['email'] . '</FL>
-                <FL val="Número de ID">' . $item["number"] . '</FL>
-                <FL val="Phone">' . $home . '</FL>
-                <FL val="Mobile">' . $mobile . '</FL>
-                </row>
-                </Contacts>';
+                            <row no="1">
+                            <FL val="First Name"></FL>
+                            <FL val="Last Name">' . $data['data']['patient']['name'] . '</FL>
+                            <FL val="Email">' . $data['data']['patient']['email'] . '</FL>
+                            <FL val="Número de ID">' . $item["number"] . '</FL>
+                            <FL val="Phone">' . $home . '</FL>
+                            <FL val="Mobile">' . $mobile . '</FL>
+                            </row>
+                            </Contacts>';
                             $result = $this->zoho->crearContacto($xml);
                             $current_timestamp = date('Y-m-d H:i:s');
                             $this->contacto_model->guardarContacto($data['data']['patient']['name'], $mobile, $current_timestamp, $data['data']['patient']['email'], $item["number"]);
@@ -106,19 +106,56 @@ class Api extends REST_Controller {
     }
 
     public function contacto_post() {
-        $data = $this->post();
-        //log_message('error', 'Entre');
-        //log_message('error', json_encode($data));
-        $user = $this->factura_model->getUser();
+        $post = $this->post();
+        $current_timestamp = date('Y-m-d H:i:s');
+        $result = $this->zoho->buscarContactoJson();
+        $result = json_decode($result);
+        $i = 0;
+        $contacto = "";
+        foreach ($result->response->result->Contacts->row as $item) {
+            foreach ($item as $data) {
+                if (is_array($data)) {
+                    foreach ($data as $key => $object) {
+                        if ($object->val == 'CONTACTID' && $object->content == $post['id']) {
+                            $contacto = $data;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        $nombre = "";
+        $mobile = "";
+        $email = "";
+        $identificacion = "";
+
+        foreach ($contacto as $item) {
+            if ($item->val == 'First Name') {
+                $nombre = $item->content;
+            }
+            if ($item->val == 'Last Name') {
+                $nombre = " " . $item->content;
+            }
+            if ($item->val == 'Phone') {
+                $mobile = " " . $item->content;
+            }
+            if ($item->val == 'Email') {
+                $email = " " . $item->content;
+            }
+            if ($item->val == 'Número de ID') {
+                $identificacion = " " . $item->content;
+            }
+        }
+        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion);
         $message = [
-            'type' => "error",
-            'message' => $user
+            'type' => "success"
         ];
 
 
         $this->set_response($message, REST_Controller::HTTP_CREATED);
     }
-
+/*
     public function producto_post() {
         $data = $this->post();
         //log_message('error', 'Entre');
@@ -132,5 +169,5 @@ class Api extends REST_Controller {
 
         $this->set_response($message, REST_Controller::HTTP_CREATED);
     }
-
+*/
 }

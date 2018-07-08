@@ -7,6 +7,7 @@ class Contacto_model extends CI_Model {
     }
 
     function guardarContacto($nombre, $telefono, $fecha, $email, $identificacion) {
+        //if existe actualiza y si no inserta
         $data = array(
             'ZONA' => "ND",
             'CLASE_DOCUMENTO' => "",
