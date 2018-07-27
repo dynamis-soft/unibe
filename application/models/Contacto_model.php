@@ -6,18 +6,20 @@ class Contacto_model extends CI_Model {
         parent::__construct();
     }
 
-    function guardarContacto($nombre, $telefono, $fecha, $email, $identificacion,$docgenerar,$GLN, $acepta, $utiliza ) {
+    function guardarContacto($nombre, $telefono, $fecha, $email, $identificacion,$docgenerar, $GLN, $acepta, $utiliza) {
         //if existe actualiza y si no inserta
-
-        $query = $this->db
-                ->get_where('hospital.CLIENTE', ['CLIENTE' => $identificacion]);
-        $contacto = $query->last_row();
-        if (!empty($contacto)) {
+        $sql = "SELECT * FROM hospital.CLIENTE where cliente = '" . trim($identificacion) . "'";
+        $query = $this->db->query($sql);
+        if ($query->num_rows() > 0) {
             $data = array(
-                'NOMBRE' => $nombre,
-                'TELEFONO1' => $telefono,
-                'FECHA_INGRESO' => $fecha,
-                'E_MAIL' => $email
+                'GLN' => trim($GLN),
+                'NOMBRE' => trim($nombre),
+                'TELEFONO1' => trim($telefono),
+                'FECHA_INGRESO' => trim($fecha),
+                'E_MAIL' => trim($email),
+                'EMAIL_DOC_ELECTRONICO' => trim($email),
+                'ACEPTA_DOC_ELECTRONICO' => trim($acepta),
+                'CONFIRMA_DOC_ELECTRONICO' => trim($utiliza),
             );
             $this->db->where('CLIENTE', $identificacion);
             return $this->db->update('hospital.CLIENTE', $data);
@@ -31,7 +33,7 @@ class Contacto_model extends CI_Model {
                 'ASOCOBLIGCONTFACT' => "",
                 'DIAS_PROMED_ATRASO' => 0,
                 'TIENE_CONVENIO' => "",
-                'DOC_A_GENERAR' => trim($docgenerar),
+                'DOC_A_GENERAR' => /* trim($docgenerar) */"",
                 'USAR_DESC_CORP' => "",
                 'VERIF_LIMCRED_CORP' => "",
                 'APLICAC_ABIERTAS' => "",
@@ -70,7 +72,7 @@ class Contacto_model extends CI_Model {
                 'CONTRIBUYENTE' => "ND",
                 'CARGO' => "",
                 'CONTACTO' => "ND",
-                'GLN'=>trim($GLN),
+                'GLN' => trim($GLN),
                 'CLIENTE' => trim($identificacion),
                 'NOMBRE' => trim($nombre),
                 'TELEFONO1' => trim($telefono),
