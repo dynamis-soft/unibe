@@ -52,7 +52,8 @@ class Api extends REST_Controller {
                             </Contacts>';
                             $result = $this->zoho->crearContacto($xml);
                             $current_timestamp = date('Y-m-d H:i:s');
-                            $this->contacto_model->guardarContacto($data['data']['patient']['name'], $mobile, $current_timestamp, $data['data']['patient']['email'], $item["number"]);
+                            $this->contacto_model->guardarContacto($data['data']['patient']['name'], $mobile, $current_timestamp, $data['data']['patient']['email'], 
+                                    $item["number"],'0','00000000000000','S','S');
                         }
                     }
                 }
@@ -93,12 +94,24 @@ class Api extends REST_Controller {
 
     public function facturacion_post() {
         $data = $this->post();
-        //log_message('error', 'Entre');
-        //log_message('error', json_encode($data));
-        $user = $this->factura_model->getUser();
+        $result = $this->zoho->getOportunidad();
+        $result = json_decode($result);
+        $i = 0;
+        $oportunidad = "";
+        foreach ($result->response->result->Deals->row as $item) {
+            foreach ($item as $data) {
+                if (is_array($data)) {
+                    foreach ($data as $key => $object) {
+                        if ($object->val == 'DEALID' && $object->content == $post['id']) {
+                            $oportunidad = $data;
+                        }
+                    }
+                }
+            }
+        }
         $message = [
             'type' => "error",
-            'message' => $user
+            'message' => $data
         ];
 
 
@@ -129,7 +142,10 @@ class Api extends REST_Controller {
         $mobile = "";
         $email = "";
         $identificacion = "";
-
+        $docgenerar = "";
+        $GLN = "";
+        $confirma = "";
+        $utiliza = "";
         foreach ($contacto as $item) {
             if ($item->val == 'First Name') {
                 $nombre = $item->content;
@@ -146,8 +162,29 @@ class Api extends REST_Controller {
             if ($item->val == 'Número de ID') {
                 $identificacion = " " . $item->content;
             }
+            if ($item->val == 'Número de ID') {
+                $identificacion = " " . $item->content;
+            }
+            if ($item->val == 'Documento a Generar') {
+                $docgenerar = " " . $item->content;
+            }
+            if ($item->val == 'GLN') {
+                $GLN = " " . $item->content;
+            }
+            if ($item->val == 'Confirmación Electrónica') {
+                if ($item->content == "SI") {
+                    $confirma = "S";
+                } else
+                    $confirma = "N";
+            }
+            if ($item->val == 'Utiliza documentos electrónicos') {
+                if ($item->content == "SI") {
+                    $utiliza = "S";
+                } else
+                    $utiliza = "N";
+            }
         }
-        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion);
+        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma,$utiliza);
         $message = [
             'type' => "success"
         ];
@@ -155,19 +192,5 @@ class Api extends REST_Controller {
 
         $this->set_response($message, REST_Controller::HTTP_CREATED);
     }
-/*
-    public function producto_post() {
-        $data = $this->post();
-        //log_message('error', 'Entre');
-        //log_message('error', json_encode($data));
-        $user = $this->factura_model->getUser();
-        $message = [
-            'type' => "error",
-            'message' => $user
-        ];
 
-
-        $this->set_response($message, REST_Controller::HTTP_CREATED);
-    }
-*/
 }

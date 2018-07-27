@@ -6,10 +6,6 @@ class Factura_model extends CI_Model {
         parent::__construct();
     }
 
-    function getUser() {
-        $query = $this->db
-                ->get_where('user');
-        return $query->result();
-    }
+
 
 }

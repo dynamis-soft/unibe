@@ -50,7 +50,7 @@ class Zoho {
         return $result;
     }
 
-     function buscarContacto() {
+    function buscarContacto() {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/xml/Contacts/getRecords";
         $param = "authtoken=" . TOKEN . "&scope=crmapi&newFormat=1";
@@ -64,9 +64,9 @@ class Zoho {
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
-    }    
-    
-       function buscarContactoJson() {
+    }
+
+    function buscarContactoJson() {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/json/Contacts/getRecords";
         $param = "authtoken=" . TOKEN . "&scope=crmapi";
@@ -80,7 +80,8 @@ class Zoho {
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
-    }    
+    }
+
     function crearContacto($xml) {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/xml/Contacts/insertRecords";
@@ -95,14 +96,29 @@ class Zoho {
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
-    }    
-    
-    
+    }
+
 //https://crm.zoho.com/crm/private/json/Leads/getRecords?authtoken=Auth Token&scope=crmapi
     function getOpciones() {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/json/Leads/getRecords";
         $param = "authtoken=" . TOKEN . "&scope=crmapi&selectColumns=Deals(Stage)";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
+
+    function getOportunidad() {
+        $token = "AUTHTOKEN";
+        $url = "https://crm.zoho.com/crm/private/json/Deals/getRecords";
+        $param = "authtoken=" . TOKEN . "&scope=crmapi";
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
