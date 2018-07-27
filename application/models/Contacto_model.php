@@ -10,7 +10,7 @@ class Contacto_model extends CI_Model {
         //if existe actualiza y si no inserta
 
         $query = $this->db
-                ->get_where('unibe.CLIENTE', ['CLIENTE' => $identificacion]);
+                ->get_where('hospital.CLIENTE', ['CLIENTE' => $identificacion]);
         $contacto = $query->last_row();
         if (!empty($contacto)) {
             $data = array(
@@ -20,7 +20,7 @@ class Contacto_model extends CI_Model {
                 'E_MAIL' => $email
             );
             $this->db->where('CLIENTE', $identificacion);
-            return $this->db->update('unibe.CLIENTE', $data);
+            return $this->db->update('hospital.CLIENTE', $data);
         } else {
             $data = array(
                 'ZONA' => "ND",
@@ -77,7 +77,7 @@ class Contacto_model extends CI_Model {
                 'E_MAIL' => $email
             );
 
-            $this->db->insert('unibe.CLIENTE', $data);
+            $this->db->insert('hospital.CLIENTE', $data);
         }
     }
 
