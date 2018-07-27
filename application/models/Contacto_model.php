@@ -70,9 +70,9 @@ class Contacto_model extends CI_Model {
                 'CONTRIBUYENTE' => "ND",
                 'CARGO' => "",
                 'CONTACTO' => "ND",
-                'CLIENTE' => $identificacion,
-                'NOMBRE' => $nombre,
-                'TELEFONO1' => $telefono,
+                'CLIENTE' => trim($identificacion),
+                'NOMBRE' => trim($nombre),
+                'TELEFONO1' => trim($telefono),
                 'FECHA_INGRESO' => $fecha,
                 'E_MAIL' => $email
             );
