@@ -8,9 +8,9 @@ class Factura_model extends CI_Model {
 
     function guardarFactura($nombre,  $identificacion) {
         //if existe actualiza y si no inserta
-        $sql = "SELECT * FROM hospital.PEDIDO";
+        $sql = "SELECT count(*) 'cantidad' FROM hospital.PEDIDO";
         $query = $this->db->query($sql);
-        $id = $query->num_rows() + 1;
+        $id = $query->result()[0]->cantidad + 1;
 
         $data = array(
             'PEDIDO' => $id,
