@@ -52,8 +52,7 @@ class Api extends REST_Controller {
                             </Contacts>';
                             $result = $this->zoho->crearContacto($xml);
                             $current_timestamp = date('Y-m-d H:i:s');
-                            $this->contacto_model->guardarContacto($data['data']['patient']['name'], $mobile, $current_timestamp, $data['data']['patient']['email'], 
-                                    $item["number"],'0','00000000000000','S','S');
+                            $this->contacto_model->guardarContacto($data['data']['patient']['name'], $mobile, $current_timestamp, $data['data']['patient']['email'], $item["number"], '0', '00000000000000', 'S', 'S');
                         }
                     }
                 }
@@ -109,6 +108,73 @@ class Api extends REST_Controller {
                 }
             }
         }
+        $id_contacto = "";
+        foreach ($oportunidad as $item) {
+            if ($item->val == 'CONTACTID') {
+                $id_contacto = $item->content;
+            }
+        }
+        $result = $this->zoho->buscarContactoJson();
+        $result = json_decode($result);
+        $i = 0;
+        $contacto = "";
+        foreach ($result->response->result->Contacts->row as $item) {
+            foreach ($item as $data) {
+                if (is_array($data)) {
+                    foreach ($data as $key => $object) {
+                        if ($object->val == 'CONTACTID' && $object->content == $id_contacto) {
+                            $contacto = $data;
+                        }
+                    }
+                }
+            }
+        }
+        $nombre = "";
+        $mobile = "";
+        $email = "";
+        $identificacion = "";
+        $docgenerar = "";
+        $GLN = "";
+        $confirma = "";
+        $utiliza = "";
+
+        foreach ($contacto as $item) {
+            if ($item->val == 'Full Name') {
+                $nombre = $item->content;
+            }
+            if ($item->val == 'Phone') {
+                $mobile = " " . $item->content;
+            }
+            if ($item->val == 'Email') {
+                $email = $item->content;
+            }
+            if ($item->val == 'Número de ID') {
+                $identificacion = $item->content;
+            }
+            if ($item->val == 'Número de ID') {
+                $identificacion = " " . $item->content;
+            }
+            if ($item->val == 'Documento a Generar') {
+                $docgenerar = $item->content;
+            }
+            if ($item->val == 'GLN') {
+                $GLN = $item->content;
+            }
+            if ($item->val == 'Confirmación Electrónica') {
+                if ($item->content == "SI") {
+                    $confirma = "S";
+                } else
+                    $confirma = "N";
+            }
+            if ($item->val == 'Utiliza documentos electrónicos') {
+                if ($item->content == "SI") {
+                    $utiliza = "S";
+                } else
+                    $utiliza = "N";
+            }
+        }
+        $this->factura_model->guardarFactura($nombre, $identificacion);
+
         $message = [
             'type' => "error",
             'message' => $data
@@ -147,29 +213,26 @@ class Api extends REST_Controller {
         $confirma = "";
         $utiliza = "";
         foreach ($contacto as $item) {
-            if ($item->val == 'First Name') {
+            if ($item->val == 'Full Name') {
                 $nombre = $item->content;
-            }
-            if ($item->val == 'Last Name') {
-                $nombre = " " . $item->content;
             }
             if ($item->val == 'Phone') {
                 $mobile = " " . $item->content;
             }
             if ($item->val == 'Email') {
-                $email = " " . $item->content;
+                $email = $item->content;
             }
             if ($item->val == 'Número de ID') {
-                $identificacion = " " . $item->content;
+                $identificacion = $item->content;
             }
             if ($item->val == 'Número de ID') {
                 $identificacion = " " . $item->content;
             }
             if ($item->val == 'Documento a Generar') {
-                $docgenerar = " " . $item->content;
+                $docgenerar = $item->content;
             }
             if ($item->val == 'GLN') {
-                $GLN = " " . $item->content;
+                $GLN = $item->content;
             }
             if ($item->val == 'Confirmación Electrónica') {
                 if ($item->content == "SI") {
@@ -184,7 +247,7 @@ class Api extends REST_Controller {
                     $utiliza = "N";
             }
         }
-        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma,$utiliza);
+        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza);
         $message = [
             'type' => "success"
         ];
