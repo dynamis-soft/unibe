@@ -92,7 +92,6 @@ class Factura_model extends CI_Model {
             'FECHA_PROYECTADA' => date('Y-m-d H:i:s'),
             'NoteExistsFlag' => 0,
             'RecordDate' => date('Y-m-d H:i:s'),
-            'RowPointer' => NULL,
             'CreatedBy' => 'FA/SA',
             'UpdatedBy' => 'FA/SA',
             'CreateDate' => date('Y-m-d H:i:s'),
