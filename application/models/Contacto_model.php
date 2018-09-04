@@ -17,15 +17,15 @@ class Contacto_model extends CI_Model {
                 'NOMBRE' => trim($nombre),
                 'ALIAS' => trim($nombre),
                 'TELEFONO1' => trim($telefono),
-                'FECHA_INGRESO' => trim($fecha),
                 'E_MAIL' => trim($email),
                 'EMAIL_DOC_ELECTRONICO' => trim($email),
                 'ACEPTA_DOC_ELECTRONICO' => trim($acepta),
                 'CONFIRMA_DOC_ELECTRONICO' => trim($utiliza),
                 'TIPO_CONTRIBUYENTE' => trim($tipo[0]),
             );
-            $this->db->where('CLIENTE', $identificacion);
-            return $this->db->update('hospital.CLIENTE', $data);
+            $query = $this->db->update('hospital.CLIENTE', $data, array('CLIENTE' => trim($identificacion)));
+            print_r($query);
+            return $query;
         } else {
             $data = array(
                 'ZONA' => "CLIE",
