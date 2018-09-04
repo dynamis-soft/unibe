@@ -212,10 +212,15 @@ class Api extends REST_Controller {
         $GLN = "";
         $confirma = "";
         $utiliza = "";
+        $tipoIdentificacion ="";
         foreach ($contacto as $item) {
             if ($item->val == 'Full Name') {
                 $nombre = $item->content;
             }
+            if ($item->val == 'Tipo de ID') {
+                $tipoIdentificacion = $item->content;
+            }
+
             if ($item->val == 'Phone') {
                 $mobile = " " . $item->content;
             }
@@ -247,7 +252,7 @@ class Api extends REST_Controller {
                     $utiliza = "N";
             }
         }
-        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza);
+        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza,$tipoIdentificacion);
         $message = [
             'type' => "success"
         ];

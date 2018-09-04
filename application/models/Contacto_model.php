@@ -6,7 +6,8 @@ class Contacto_model extends CI_Model {
         parent::__construct();
     }
 
-    function guardarContacto($nombre, $telefono, $fecha, $email, $identificacion,$docgenerar, $GLN, $acepta, $utiliza) {
+    function guardarContacto($nombre, $telefono, $fecha, $email, $identificacion,$docgenerar, $GLN, $acepta, $utiliza,$tipoIdentificacion) {
+        $tipo = explode(" ",$tipoIdentificacion);
         //if existe actualiza y si no inserta
         $sql = "SELECT * FROM hospital.CLIENTE where cliente = '" . trim($identificacion) . "'";
         $query = $this->db->query($sql);
@@ -14,18 +15,20 @@ class Contacto_model extends CI_Model {
             $data = array(
                 'GLN' => trim($GLN),
                 'NOMBRE' => trim($nombre),
+                'ALIAS' => trim($nombre),
                 'TELEFONO1' => trim($telefono),
                 'FECHA_INGRESO' => trim($fecha),
                 'E_MAIL' => trim($email),
                 'EMAIL_DOC_ELECTRONICO' => trim($email),
                 'ACEPTA_DOC_ELECTRONICO' => trim($acepta),
                 'CONFIRMA_DOC_ELECTRONICO' => trim($utiliza),
+                'TIPO_CONTRIBUYENTE' => trim($tipo[0]),
             );
             $this->db->where('CLIENTE', $identificacion);
             return $this->db->update('hospital.CLIENTE', $data);
         } else {
             $data = array(
-                'ZONA' => "ND",
+                'ZONA' => "CLIE",
                 'CLASE_DOCUMENTO' => "",
                 'AJUSTE_FECHA_COBRO' => "",
                 'USAR_EXENCIMP_CORP' => "",
@@ -51,7 +54,7 @@ class Contacto_model extends CI_Model {
                 'ACTIVO' => "S",
                 'ACEPTA_FRACCIONES' => "",
                 'COBRADOR' => "ND",
-                'RUTA' => "ND",
+                'RUTA' => "CLIE",
                 'PAIS' => "CRI",
                 'ACEPTA_BACKORDER' => "",
                 'MONEDA_NIVEL' => "L",
@@ -75,12 +78,14 @@ class Contacto_model extends CI_Model {
                 'GLN' => trim($GLN),
                 'CLIENTE' => trim($identificacion),
                 'NOMBRE' => trim($nombre),
+                'ALIAS' => trim($nombre),
                 'TELEFONO1' => trim($telefono),
                 'FECHA_INGRESO' => trim($fecha),
                 'E_MAIL' => trim($email),
                 'EMAIL_DOC_ELECTRONICO' => trim($email),
                 'ACEPTA_DOC_ELECTRONICO' => trim($acepta),
                 'CONFIRMA_DOC_ELECTRONICO' => trim($utiliza),
+                'TIPO_CONTRIBUYENTE' => trim($tipo[0]),
             );
 
             $this->db->insert('hospital.CLIENTE', $data);
