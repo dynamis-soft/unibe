@@ -203,56 +203,43 @@ class Api extends REST_Controller {
             }
         }
 
-
-        $nombre = "";
-        $mobile = "";
-        $email = "";
-        $identificacion = "";
-        $docgenerar = "";
-        $GLN = "";
-        $confirma = "";
-        $utiliza = "";
-        $tipoIdentificacion ="";
+        $data = array();
         foreach ($contacto as $item) {
             if ($item->val == 'Full Name') {
-                $nombre = $item->content;
+                $data['nombre'] = $item->content;
             }
             if ($item->val == 'Tipo de ID') {
-                $tipoIdentificacion = $item->content;
+                $value = explode("-", trim($item->content));
+                $data['tipoIdentificacion'] = $value[0];
             }
 
             if ($item->val == 'Phone') {
-                $mobile = " " . $item->content;
+                $data['mobile'] = $item->content;
             }
             if ($item->val == 'Email') {
-                $email = $item->content;
+                $data['email'] = $item->content;
             }
             if ($item->val == 'Número de ID') {
-                $identificacion = $item->content;
-            }
-            if ($item->val == 'Número de ID') {
-                $identificacion = " " . $item->content;
+                $data['identificacion'] = $item->content;
             }
             if ($item->val == 'Documento a Generar') {
-                $docgenerar = $item->content;
-            }
-            if ($item->val == 'GLN') {
-                $GLN = $item->content;
+                $data['docgenerar'] = $item->content;
             }
             if ($item->val == 'Confirmación Electrónica') {
                 if ($item->content == "SI") {
-                    $confirma = "S";
+                    $data['confirma'] = "S";
                 } else
-                    $confirma = "N";
+                    $data['confirma'] = "N";
             }
             if ($item->val == 'Utiliza documentos electrónicos') {
                 if ($item->content == "SI") {
-                    $utiliza = "S";
+                    $data['utiliza'] = "S";
                 } else
-                    $utiliza = "N";
+                    $data['utiliza'] = "N";
             }
         }
-        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza,$tipoIdentificacion);
+        $data['GLN'] = "0000000000000";
+        $this->contacto_model->guardarContacto($data);
         $message = [
             'type' => "success"
         ];

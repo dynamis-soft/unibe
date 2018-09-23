@@ -8,12 +8,13 @@ class Factura_model extends CI_Model {
 
     function guardarFactura($nombre,  $identificacion) {
         //if existe actualiza y si no inserta
-        $sql = "SELECT count(*) 'cantidad' FROM hospital.PEDIDO";
+        $sql = "SELECT VALOR_CONSECUTIVO cantidad FROM [CAPACITA].[hospital].[Consecutivo_FA] where codigo_consecutivo='PEDIDO'";
         $query = $this->db->query($sql);
-        $id = $query->result()[0]->cantidad + 1;
-
-        $data = array(
-            'PEDIDO' => $id,
+        $id = $query->result()[0]->cantidad;
+        $id = str_replace("PED", "", $id);
+        $id = (int)$id+1;
+        $data = array(           
+            'PEDIDO' =>"PED00".$id,
             'ESTADO' => "N",
             'FECHA_PEDIDO' => date('Y-m-d H:i:s'),
             'FECHA_PROMETIDA' => date('Y-m-d H:i:s'),
