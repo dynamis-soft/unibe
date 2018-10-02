@@ -6,14 +6,15 @@ class Factura_model extends CI_Model {
         parent::__construct();
     }
 
-    function guardarFactura($nombre,  $identificacion) {
+    function guardarFactura($nombre, $identificacion) {
         //if existe actualiza y si no inserta
-        $sql = "SELECT count(*) 'cantidad' FROM hospital.PEDIDO";
+        $sql = "SELECT VALOR_CONSECUTIVO cantidad FROM [CAPACITA].[hospital].[Consecutivo_FA] where codigo_consecutivo='PEDIDO'";
         $query = $this->db->query($sql);
-        $id = $query->result()[0]->cantidad + 1;
-
+        $id = $query->result()[0]->cantidad;
+        $id = str_replace("PED", "", $id);
+        $id = (int) $id + 1;
         $data = array(
-            'PEDIDO' => $id,
+            'PEDIDO' => "PED00" . $id,
             'ESTADO' => "N",
             'FECHA_PEDIDO' => date('Y-m-d H:i:s'),
             'FECHA_PROMETIDA' => date('Y-m-d H:i:s'),
@@ -114,13 +115,13 @@ class Factura_model extends CI_Model {
             'PERIODICIDAD_CONTRATO_AC' => NULL,
             'FECHA_CONTRATO_AC' => NULL,
             'FECHA_INICIO_CONTRATO_AC' => NULL,
-            'FECHA_PROXFAC_CONTRATO_AC' =>NULL,
+            'FECHA_PROXFAC_CONTRATO_AC' => NULL,
             'FECHA_FINFAC_CONTRATO_AC' => NULL,
             'FECHA_ULTAUMENTO_CONTRATO_AC' => NULL,
-            'FECHA_PROXFACSIST_CONTRATO_AC' =>NULL,
+            'FECHA_PROXFACSIST_CONTRATO_AC' => NULL,
             'DIFERIDO_CONTRATO_AC' => NULL,
             'TOTAL_CONTRATO_AC' => NULL,
-            'CONTRATO_REVENTA' =>'N',
+            'CONTRATO_REVENTA' => 'N',
             'USR_NO_APRUEBA' => NULL,
             'FECHA_NO_APRUEBA' => NULL,
             'RAZON_DESAPRUEBA' => NULL,
@@ -131,10 +132,15 @@ class Factura_model extends CI_Model {
             'CONTRATO_VIGENCIA_HASTA' => NULL,
             'FORMA_PAGO' => NULL,
             'CLAVE_REFERENCIA_DE' => NULL,
-            'FECHA_REFERENCIA_DE' => NULL          
+            'FECHA_REFERENCIA_DE' => NULL
         );
 
         $this->db->insert('hospital.PEDIDO', $data);
+        $data3 = array(
+            'VALOR_CONSECUTIVO' => $id
+        );
+        $this->db->where('codigo_consecutivo', 'PEDIDO');
+        return $this->db->update('hospital.Consecutivo_FA', $data3);
     }
 
 }

@@ -20,11 +20,75 @@ class Welcome extends CI_Controller {
      * @see https://codeigniter.com/user_guide/general/urls.html
      */
     public function index() {
-       //$user = $this->factura_model->getUser();
+        //$user = $this->factura_model->getUser();
         //print_r($user); die();
         $current_timestamp = date('Y-m-d H:i:s');
-        $this->contacto_model->guardarContacto("Juan Rojas","88888888",$current_timestamp,"usuario@email.com","1-1111-1111");
-        $this->load->view('welcome_message');
+        $result = $this->zoho->buscarContactoJson();
+        $result = json_decode($result);
+        $i = 0;
+        $contacto = "";
+        foreach ($result->response->result->Contacts->row as $item) {
+            foreach ($item as $data) {
+                if (is_array($data)) {
+                    foreach ($data as $key => $object) {
+                        if ($object->val == 'CONTACTID' && $object->content == '3080805000001653150') {
+                            $contacto = $data;
+                        }
+                    }
+                }
+            }
+        }
+
+        $nombre = "";
+        $mobile = "";
+        $email = "";
+        $identificacion = "";
+        $docgenerar = "";
+        $GLN = "";
+        $confirma = "";
+        $utiliza = "";
+        $tipoIdentificacion ="";
+        foreach ($contacto as $item) {
+            if ($item->val == 'Full Name') {
+                $nombre = $item->content;
+            }
+            if ($item->val == 'Tipo de ID') {
+                $tipoIdentificacion = $item->content;
+            }
+
+            if ($item->val == 'Phone') {
+                $mobile = " " . $item->content;
+            }
+            if ($item->val == 'Email') {
+                $email = $item->content;
+            }
+            if ($item->val == 'Número de ID') {
+                $identificacion = $item->content;
+            }
+            if ($item->val == 'Número de ID') {
+                $identificacion = " " . $item->content;
+            }
+            if ($item->val == 'Documento a Generar') {
+                $docgenerar = $item->content;
+            }
+            if ($item->val == 'GLN') {
+                $GLN = $item->content;
+            }
+            if ($item->val == 'Confirmación Electrónica') {
+                if ($item->content == "SI") {
+                    $confirma = "S";
+                } else
+                    $confirma = "N";
+            }
+            if ($item->val == 'Utiliza documentos electrónicos') {
+                if ($item->content == "SI") {
+                    $utiliza = "S";
+                } else
+                    $utiliza = "N";
+            }
+        }
+        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza,$tipoIdentificacion);
+       $this->load->view('welcome_message');
     }
 
 }
