@@ -73,12 +73,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 //sqlcmd -S 201.195.234.130 -U ClinicaCRM -P Cl1n1c4CRM -Q "SELECT @@VERSION"
+
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => '201.195.234.130',
+	'hostname' => '10.0.0.11',
         'port' => 1433,
 	'username' => 'ClinicaCRM',
-    'password' => 'Cl1n1c4CRM2',
+        'password' => 'Cl1n1c4CRM2',
 	'database' => 'CAPACITA',
 	'dbdriver' => 'sqlsrv',
 	'dbprefix' => '',
@@ -96,26 +97,3 @@ $db['default'] = array(
 	'save_queries' => TRUE
 );
  
-/*
-$db['default'] = array(
-	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => 'root',
-	'database' => 'unibe',
-	'dbdriver' => 'mysqli',
-	'dbprefix' => '',
-	'pconnect' => FALSE,
-	'db_debug' => TRUE,
-	'cache_on' => FALSE,
-	'cachedir' => '',
-	'char_set' => 'utf8',
-	'dbcollat' => 'utf8_general_ci',
-	'swap_pre' => '',
-	'encrypt' => FALSE,
-	'compress' => FALSE,
-	'stricton' => FALSE,
-	'failover' => array(),
-	'save_queries' => TRUE
-);
-*/

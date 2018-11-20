@@ -21,7 +21,13 @@ class Welcome extends CI_Controller {
      */
     public function index() {
         //$user = $this->factura_model->getUser();
-        //print_r($user); die();
+        echo strpos('C% Cantones San José', "C-");
+        if (strpos('C- Cantones San José', "C-") > 0) {
+            $value = explode("-", trim($item->content));
+            $data['barrio'] = $value[0];
+        }
+
+        die();
         $current_timestamp = date('Y-m-d H:i:s');
         $result = $this->zoho->buscarContactoJson();
         $result = json_decode($result);
@@ -47,7 +53,7 @@ class Welcome extends CI_Controller {
         $GLN = "";
         $confirma = "";
         $utiliza = "";
-        $tipoIdentificacion ="";
+        $tipoIdentificacion = "";
         foreach ($contacto as $item) {
             if ($item->val == 'Full Name') {
                 $nombre = $item->content;
@@ -87,8 +93,8 @@ class Welcome extends CI_Controller {
                     $utiliza = "N";
             }
         }
-        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza,$tipoIdentificacion);
-       $this->load->view('welcome_message');
+        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza, $tipoIdentificacion);
+        $this->load->view('welcome_message');
     }
 
 }

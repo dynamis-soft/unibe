@@ -87,4 +87,4 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
 /*CUSTOM*/
 define('USER','crmhospital@unibe.ac.cr');
 define('PASSWORD','Clinica2018+');
-define('TOKEN','4df3c3febd8984f106ed45ebb83a9a88');
+define('TOKEN','da48bdc24592b130f5600726c42ea5b5');

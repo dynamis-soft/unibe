@@ -202,7 +202,6 @@ class Api extends REST_Controller {
                 }
             }
         }
-
         $data = array();
         foreach ($contacto as $item) {
             if ($item->val == 'Full Name') {
@@ -250,15 +249,16 @@ class Api extends REST_Controller {
                 $value = explode("-", trim($item->content));
                 $data['provincia'] = $value[0];
             }
-            if (strpos($item->val, "*C*")) {
+            if (strpos($item->val, "C-") !== false) {
                 $value = explode("-", trim($item->content));
                 $data['canton'] = $value[0];
             }
-            if (strpos($item->val, "*D*")) {
+            if (strpos($item->val, "D-") !== false) {
                 $value = explode("-", trim($item->content));
                 $data['distrito'] = $value[0];
             }
-            if (strpos($item->val, "*B*")) {
+            
+            if (strpos($item->val, "B-") !== false) {
                 $value = explode("-", trim($item->content));
                 $data['barrio'] = $value[0];
             }
