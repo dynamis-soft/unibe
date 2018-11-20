@@ -7,7 +7,7 @@ class Zoho {
 
     function token() {
         //GET URL from Post    
-        $url = "https://accounts.zoho.com/apiauthtoken/nb/create?SCOPE=ZohoCreator/creatorapi&EMAIL_ID=" . USER . "&PASSWORD=" . PASSWORD;
+        $url = "https://accounts.zoho.com/apiauthtoken/nb/create?SCOPE=ZohoCreator/crmapi&EMAIL_ID=" . USER . "&PASSWORD=" . PASSWORD;
         $curl = curl_init();
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
