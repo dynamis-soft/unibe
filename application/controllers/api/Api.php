@@ -109,9 +109,13 @@ class Api extends REST_Controller {
             }
         }
         $id_contacto = "";
+        $profesional = "";
         foreach ($oportunidad as $item) {
             if ($item->val == 'CONTACTID') {
                 $id_contacto = $item->content;
+            }
+            if ($item->val == 'Profesional') {
+                $profesional = $item->content;
             }
         }
         $result = $this->zoho->buscarContactoJson();
@@ -173,7 +177,7 @@ class Api extends REST_Controller {
                     $utiliza = "N";
             }
         }
-        $this->factura_model->guardarFactura($nombre, $identificacion);
+        $this->factura_model->guardarFactura($nombre, $identificacion,$profesional);
 
         $message = [
             'type' => "error",
@@ -257,7 +261,7 @@ class Api extends REST_Controller {
                 $value = explode("-", trim($item->content));
                 $data['distrito'] = $value[0];
             }
-            
+
             if (strpos($item->val, "B-") !== false) {
                 $value = explode("-", trim($item->content));
                 $data['barrio'] = $value[0];

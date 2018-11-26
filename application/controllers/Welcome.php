@@ -21,14 +21,33 @@ class Welcome extends CI_Controller {
      */
     public function index() {
         //$user = $this->factura_model->getUser();
-        echo strpos('C% Cantones San José', "C-");
-        if (strpos('C- Cantones San José', "C-") > 0) {
-            $value = explode("-", trim($item->content));
-            $data['barrio'] = $value[0];
+        $post = array("id"=>"3080805000003050038");
+        $result = $this->zoho->getOportunidad();
+        $result = json_decode($result);
+        $i = 0;
+        $oportunidad = "";
+        foreach ($result->response->result->Deals->row as $item) {
+            foreach ($item as $data) {
+                if (is_array($data)) {
+                    foreach ($data as $key => $object) {
+                        if ($object->val == 'DEALID' && $object->content == $post['id']) {
+                            $oportunidad = $data;
+                        }
+                    }
+                }
+            }
         }
-
-        die();
-        $current_timestamp = date('Y-m-d H:i:s');
+        print_r($oportunidad);die();
+        $id_contacto = "";
+        $profesional = "";
+        foreach ($oportunidad as $item) {
+            if ($item->val == 'CONTACTID') {
+                $id_contacto = $item->content;
+            }
+            if ($item->val == 'Profesional') {
+                $profesional = $item->content;
+            }
+        }
         $result = $this->zoho->buscarContactoJson();
         $result = json_decode($result);
         $i = 0;
@@ -37,14 +56,13 @@ class Welcome extends CI_Controller {
             foreach ($item as $data) {
                 if (is_array($data)) {
                     foreach ($data as $key => $object) {
-                        if ($object->val == 'CONTACTID' && $object->content == '3080805000001653150') {
+                        if ($object->val == 'CONTACTID' && $object->content == $id_contacto) {
                             $contacto = $data;
                         }
                     }
                 }
             }
         }
-
         $nombre = "";
         $mobile = "";
         $email = "";
@@ -53,15 +71,11 @@ class Welcome extends CI_Controller {
         $GLN = "";
         $confirma = "";
         $utiliza = "";
-        $tipoIdentificacion = "";
+
         foreach ($contacto as $item) {
             if ($item->val == 'Full Name') {
                 $nombre = $item->content;
             }
-            if ($item->val == 'Tipo de ID') {
-                $tipoIdentificacion = $item->content;
-            }
-
             if ($item->val == 'Phone') {
                 $mobile = " " . $item->content;
             }
@@ -93,7 +107,8 @@ class Welcome extends CI_Controller {
                     $utiliza = "N";
             }
         }
-        $this->contacto_model->guardarContacto($nombre, $mobile, $current_timestamp, $email, $identificacion, $docgenerar, $GLN, $confirma, $utiliza, $tipoIdentificacion);
+        $this->factura_model->guardarFactura($nombre, $identificacion,$profesional);
+        //$this->contacto_model->guardarContacto($data);
         $this->load->view('welcome_message');
     }
 

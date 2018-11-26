@@ -46,7 +46,12 @@ class Contacto_model extends CI_Model {
                 'NATURALEZA' => 'N',
                 'ACTIVO' => 'S'
             );
-            $this->db->insert('hospital.NIT', $arrayNit);
+            //$this->db->insert('hospital.NIT', $arrayNit);
+            $sql = "SELECT ULTIMO_VALOR cantidad FROM [CAPACITA].[hospital].[CONSECUTIVO] where consecutivo='CLIENTE'";
+            $query = $this->db->query($sql);
+            $id = $query->result()[0]->cantidad;
+            $id = str_replace("C", "", $id);
+            $id = (int) $id + 1;
             $data2 = array(
                 'ZONA' => "CLIE",
                 'CLASE_DOCUMENTO' => "",
@@ -66,7 +71,7 @@ class Contacto_model extends CI_Model {
                 'REQUIERE_OC' => "",
                 'USA_TARJETA' => "",
                 'DIAS_ABASTECIMIEN' => 0,
-                'CATEGORIA_CLIENTE' => "ND",
+                'CATEGORIA_CLIENTE' => "002",
                 'COBRO_JUDICIAL' => "",
                 'EXENCION_IMP2' => 0,
                 'EXENCION_IMP1' => 0,
@@ -96,7 +101,7 @@ class Contacto_model extends CI_Model {
                 'CARGO' => "",
                 'CONTACTO' => "ND",
                 'GLN' => $data['GLN'],
-                'CLIENTE' => $data['identificacion'],
+                'CLIENTE' => "C00" . $id,
                 'NOMBRE' => $data['nombre'],
                 'ALIAS' => $data['nombre'],
                 'TELEFONO1' => $data['mobile'],
@@ -110,9 +115,14 @@ class Contacto_model extends CI_Model {
                 'DIVISION_GEOGRAFICA3' => $data['distrito'],
                 'DIVISION_GEOGRAFICA4' => $data['barrio'],
                 'NIVEL_PRECIO' => $data['precio']
-                
             );
+            print_r($data2);
             $this->db->insert('hospital.CLIENTE', $data2);
+            $data3 = array(
+                'ULTIMO_VALOR' => "C00" . $id
+            );
+            //$this->db->where('consecutivo', 'CLIENTE');
+            //return $this->db->update('hospital.CONSECUTIVO', $data3);
         }
     }
 
