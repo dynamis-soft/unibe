@@ -108,6 +108,22 @@ class Api extends REST_Controller {
                 }
             }
         }
+
+        $result2 = $this->zoho->getArticulo($post['id']);
+        $result2 = json_decode($result2);
+        $productos = array();
+        foreach ($result2->response->result->Products->row as $item) {
+            foreach ($item as $data) {
+                if (is_array($data)) {
+                    foreach ($data as $key => $object) {
+                        if ($object->val == 'Product Code') {
+                            $productos[] = $object->content;
+                        }
+                    }
+                }
+            }
+        }
+
         $id_contacto = "";
         $profesional = "";
         foreach ($oportunidad as $item) {
@@ -134,50 +150,21 @@ class Api extends REST_Controller {
             }
         }
         $nombre = "";
-        $mobile = "";
-        $email = "";
         $identificacion = "";
-        $docgenerar = "";
-        $GLN = "";
-        $confirma = "";
-        $utiliza = "";
 
         foreach ($contacto as $item) {
             if ($item->val == 'Full Name') {
                 $nombre = $item->content;
             }
-            if ($item->val == 'Phone') {
-                $mobile = " " . $item->content;
-            }
-            if ($item->val == 'Email') {
-                $email = $item->content;
-            }
-            if ($item->val == 'Número de ID') {
-                $identificacion = $item->content;
-            }
             if ($item->val == 'Número de ID') {
                 $identificacion = " " . $item->content;
             }
-            if ($item->val == 'Documento a Generar') {
-                $docgenerar = $item->content;
-            }
-            if ($item->val == 'GLN') {
-                $GLN = $item->content;
-            }
-            if ($item->val == 'Confirmación Electrónica') {
-                if ($item->content == "SI") {
-                    $confirma = "S";
-                } else
-                    $confirma = "N";
-            }
-            if ($item->val == 'Utiliza documentos electrónicos') {
-                if ($item->content == "SI") {
-                    $utiliza = "S";
-                } else
-                    $utiliza = "N";
-            }
         }
-        $this->factura_model->guardarFactura($nombre, $identificacion,$profesional);
+
+
+
+
+        $this->factura_model->guardarFactura($nombre, trim($identificacion), trim($profesional), $productos);
 
         $message = [
             'type' => "error",
@@ -274,6 +261,16 @@ class Api extends REST_Controller {
         ];
 
 
+        $this->set_response($message, REST_Controller::HTTP_CREATED);
+    }
+
+    public function pedido_post() {
+        $post = $this->post();
+        $result = $this->factura_model->existeFactura($post['id']);
+        $message = [
+            'type' => "success",
+            'cantidad' => $result
+        ];
         $this->set_response($message, REST_Controller::HTTP_CREATED);
     }
 

@@ -6,11 +6,14 @@ class Factura_model extends CI_Model {
         parent::__construct();
     }
 
-    function guardarFactura($nombre, $identificacion, $profesional) {
+    function guardarFactura($nombre, $identificacion, $profesional, $productos) {
         //if existe actualiza y si no inserta
         $sql = "SELECT VALOR_CONSECUTIVO cantidad FROM [CAPACITA].[hospital].[Consecutivo_FA] where codigo_consecutivo='PEDIDO'";
         $query = $this->db->query($sql);
         $id = $query->result()[0]->cantidad;
+        $sql = "SELECT CLIENTE cliente FROM [CAPACITA].[hospital].[CLIENTE] where CONTRIBUYENTE = '$identificacion'";
+        $query = $this->db->query($sql);
+        $cliente = $query->result()[0]->cliente;
         $id = str_replace("PED", "", $id);
         $id = (int) $id + 1;
         $data = array(
@@ -70,10 +73,10 @@ class Factura_model extends CI_Model {
             'BODEGA' => '006',
             'ZONA' => 'EMPL',
             'VENDEDOR' => 'ND',
-            'CLIENTE' => trim($identificacion),
-            'CLIENTE_DIRECCION' => trim($identificacion),
-            'CLIENTE_CORPORAC' => trim($identificacion),
-            'CLIENTE_ORIGEN' => trim($identificacion),
+            'CLIENTE' => $cliente,
+            'CLIENTE_DIRECCION' => $cliente,
+            'CLIENTE_CORPORAC' => $cliente,
+            'CLIENTE_ORIGEN' => $cliente,
             'PAIS' => 'CRI',
             'SUBTIPO_DOC_CXC' => 0,
             'TIPO_DOC_CXC' => 'FAC',
@@ -143,47 +146,57 @@ class Factura_model extends CI_Model {
         $this->db->where('codigo_consecutivo', 'PEDIDO');
         $this->db->update('hospital.Consecutivo_FA', $data3);
         $i = 1;
-        
-        
-        $data4 = array(
-            'PEDIDO' => "PED00" . $id,
-            'PEDIDO_LINEA' => $i,
-            'BODEGA' => 'ND',
-            'LOTE' => NULL,
-            'LOCALIZACION' => NULL,
-            'ARTICULO' => "X",
-            'ESTADO' => "F",
-            'FECHA_ENTREGA' => date('Y-m-d H:i:s'),
-            'LINEA_USUARIO' => $i - 1,
-            'PRECIO_UNITARIO' => 0.00000000,
-            'CANTIDAD_PEDIDA' => "X",
-            'CANTIDAD_A_FACTURA' => 0.00000000,
-            'CANTIDAD_FACTURADA' => "X",
-            'CANTIDAD_RESERVADA' => 0.00000000,
-            'CANTIDAD_BONIFICAD' => 0.00000000,
-            'CANTIDAD_CANCELADA' => 0.00000000,
-            'TIPO_DESCUENTO' => 'P',
-            'MONTO_DESCUENTO' => 0.00000000,
-            'PORC_DESCUENTO' => 0.00000000,
-            'DESCRIPCION' => '',
-            'COMENTARIO' => '',
-            'PEDIDO_LINEA_BONIF' => NULL,
-            'UNIDAD_DISTRIBUCIO' => NULL,
-            'FECHA_PROMETIDA' => date('Y-m-d H:i:s'),
-            'LINEA_ORDEN_COMPRA' => NULL,
-            'PROYECTO' => NULL,
-            'FASE' => NULL,
-            'NoteExistsFlag' => 0,
-            'RecordDate' => date('Y-m-d H:i:s'),
-            'CreatedBy' => '',
-            'UpdatedBy' => '',
-            'CreateDate' => NULL,
-            'CENTRO_COSTO' => NULL,
-            'CUENTA_CONTABLE' => NULL,
-            'RAZON_PERDIDA' => NULL,
-            'TIPO_DESC' => 0
-        );
-        $this->db->insert('hospital.PEDIDO_LINEA', $data4);
+
+        foreach ($productos as $product) {
+            $data4 = array(
+                'PEDIDO' => "PED00" . $id,
+                'PEDIDO_LINEA' => $i,
+                'BODEGA' => 'ND',
+                'LOTE' => NULL,
+                'LOCALIZACION' => NULL,
+                'ARTICULO' => $product,
+                'ESTADO' => "F",
+                'FECHA_ENTREGA' => date('Y-m-d H:i:s'),
+                'LINEA_USUARIO' => $i - 1,
+                'PRECIO_UNITARIO' => 0.00000000,
+                'CANTIDAD_PEDIDA' => 1.00000000,
+                'CANTIDAD_A_FACTURA' => 0.00000000,
+                'CANTIDAD_FACTURADA' => 1.00000000,
+                'CANTIDAD_RESERVADA' => 0.00000000,
+                'CANTIDAD_BONIFICAD' => 0.00000000,
+                'CANTIDAD_CANCELADA' => 0.00000000,
+                'TIPO_DESCUENTO' => 'P',
+                'MONTO_DESCUENTO' => 0.00000000,
+                'PORC_DESCUENTO' => 0.00000000,
+                'DESCRIPCION' => '',
+                'COMENTARIO' => '',
+                'PEDIDO_LINEA_BONIF' => NULL,
+                'UNIDAD_DISTRIBUCIO' => NULL,
+                'FECHA_PROMETIDA' => date('Y-m-d H:i:s'),
+                'LINEA_ORDEN_COMPRA' => NULL,
+                'PROYECTO' => NULL,
+                'FASE' => NULL,
+                'NoteExistsFlag' => 0,
+                'RecordDate' => date('Y-m-d H:i:s'),
+                'CreatedBy' => '',
+                'UpdatedBy' => '',
+                'CreateDate' => NULL,
+                'CENTRO_COSTO' => NULL,
+                'CUENTA_CONTABLE' => NULL,
+                'RAZON_PERDIDA' => NULL,
+                'TIPO_DESC' => 0
+            );
+            $this->db->insert('hospital.PEDIDO_LINEA', $data4);
+            $i++;
+        }
+    }
+
+    function existeFactura($id) {
+        $sql = "  SELECT count(*) cantidad
+        FROM [CAPACITA].[hospital].[PEDIDO] where PEDIDO= '$id';";
+        $query = $this->db->query($sql);
+        $id = $query->result()[0]->cantidad;
+        return $id;
     }
 
 }

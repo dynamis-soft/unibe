@@ -21,7 +21,7 @@ class Welcome extends CI_Controller {
      */
     public function index() {
         //$user = $this->factura_model->getUser();
-        $post = array("id"=>"3080805000003050038");
+        $post = array("id" => "3080805000003050038");
         $result = $this->zoho->getOportunidad();
         $result = json_decode($result);
         $i = 0;
@@ -37,9 +37,25 @@ class Welcome extends CI_Controller {
                 }
             }
         }
-        print_r($oportunidad);die();
+
+        $result2 = $this->zoho->getArticulo($post['id']);
+        $result2 = json_decode($result2);
+        $productos = array();
+        foreach ($result2->response->result->Products->row as $item) {
+            print_r($item);
+            foreach ($item as $data) {
+                if (is_array($data)) {
+                    foreach ($data as $key => $object) {
+                        if ($object->val == 'Product Code') {
+                            $productos[]=$object->content;
+                        }
+                    }
+                }
+            }
+        }
         $id_contacto = "";
         $profesional = "";
+        die();
         foreach ($oportunidad as $item) {
             if ($item->val == 'CONTACTID') {
                 $id_contacto = $item->content;
@@ -107,7 +123,7 @@ class Welcome extends CI_Controller {
                     $utiliza = "N";
             }
         }
-        $this->factura_model->guardarFactura($nombre, $identificacion,$profesional);
+        $this->factura_model->guardarFactura($nombre, $identificacion, $profesional);
         //$this->contacto_model->guardarContacto($data);
         $this->load->view('welcome_message');
     }

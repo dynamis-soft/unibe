@@ -46,7 +46,7 @@ class Contacto_model extends CI_Model {
                 'NATURALEZA' => 'N',
                 'ACTIVO' => 'S'
             );
-            //$this->db->insert('hospital.NIT', $arrayNit);
+            $this->db->insert('hospital.NIT', $arrayNit);
             $sql = "SELECT ULTIMO_VALOR cantidad FROM [CAPACITA].[hospital].[CONSECUTIVO] where consecutivo='CLIENTE'";
             $query = $this->db->query($sql);
             $id = $query->result()[0]->cantidad;
@@ -116,13 +116,12 @@ class Contacto_model extends CI_Model {
                 'DIVISION_GEOGRAFICA4' => $data['barrio'],
                 'NIVEL_PRECIO' => $data['precio']
             );
-            print_r($data2);
             $this->db->insert('hospital.CLIENTE', $data2);
             $data3 = array(
                 'ULTIMO_VALOR' => "C00" . $id
             );
-            //$this->db->where('consecutivo', 'CLIENTE');
-            //return $this->db->update('hospital.CONSECUTIVO', $data3);
+            $this->db->where('consecutivo', 'CLIENTE');
+            return $this->db->update('hospital.CONSECUTIVO', $data3);
         }
     }
 
