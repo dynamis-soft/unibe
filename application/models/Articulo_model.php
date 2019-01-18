@@ -7,14 +7,14 @@ class Articulo_model extends CI_Model {
     }
 
     function obtenerTodos() {
-        $sql = "SELECT TOP (2) ARTICULO, DESCRIPCION  FROM [CAPACITA].[hospital].[ARTICULO]";
+        $sql = "SELECT ARTICULO, DESCRIPCION  FROM [CAPACITA].[hospital].[ARTICULO]";
         $query = $this->db->query($sql);
         $records = $query->result();
         return $records;
     }
 
     function actualizar() {
-        $sql = "SELECT TOP (2) ARTICULO, DESCRIPCION   FROM [CAPACITA].[hospital].[ARTICULO] WHERE FCH_HORA_ULT_MODIF >  DATEADD(MINUTE , -5,  GetDate())";
+        $sql = "SELECT ARTICULO, DESCRIPCION   FROM [CAPACITA].[hospital].[ARTICULO] WHERE FCH_HORA_ULT_MODIF >  DATEADD(MINUTE , -5,  GetDate())";
         $query = $this->db->query($sql);
         $records = $query->result();
         return $records;
