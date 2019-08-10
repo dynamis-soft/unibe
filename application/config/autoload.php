@@ -58,7 +58,7 @@ $autoload['packages'] = array();
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array("zoho",'database');
+$autoload['libraries'] = array("zoho","zohov2",'database');
 
 /*
 | -------------------------------------------------------------------

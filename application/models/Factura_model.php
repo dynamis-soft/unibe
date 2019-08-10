@@ -6,18 +6,18 @@ class Factura_model extends CI_Model {
         parent::__construct();
     }
 
-    function guardarFactura($nombre, $identificacion, $profesional, $productos) {
+    function guardarFactura($nombre, $identificacion, $profesional, $productos, $descuento, $total, $nivelprecio,$medico) {
         //if existe actualiza y si no inserta
         $sql = "SELECT VALOR_CONSECUTIVO cantidad FROM [CAPACITA].[hospital].[Consecutivo_FA] where codigo_consecutivo='PEDIDO'";
         $query = $this->db->query($sql);
         $id = $query->result()[0]->cantidad;
         $sql = "SELECT CLIENTE cliente FROM [CAPACITA].[hospital].[CLIENTE] where CONTRIBUYENTE = '$identificacion'";
         $query = $this->db->query($sql);
-        if(!empty($query->result())){
+        if (!empty($query->result())) {
             $cliente = $query->result()[0]->cliente;
-        }else{
-             $cliente = "";
-        }        
+        } else {
+            $cliente = "";
+        }
         if ($cliente != '') {
             $id = str_replace("PED", "", $id);
             $id = (int) $id + 1;
@@ -35,27 +35,27 @@ class Factura_model extends CI_Model {
                 'EMBARCAR_A' => $nombre,
                 'DIREC_EMBARQUE' => 'ND',
                 'DIRECCION_FACTURA' => 'ND',
-                'RUBRO1' => NULL,
+                'RUBRO1' => $medico,
                 'RUBRO2' => NULL,
                 'RUBRO3' => NULL,
                 'RUBRO4' => NULL,
                 'RUBRO5' => $profesional,
                 'OBSERVACIONES' => "",
                 'COMENTARIO_CXC' => NULL,
-                'TOTAL_MERCADERIA' => 0.00000000,
+                'TOTAL_MERCADERIA' => $total,
                 'MONTO_ANTICIPO' => 0.00000000,
                 'MONTO_FLETE' => 0.00000000,
                 'MONTO_SEGURO' => 0.00000000,
                 'MONTO_DOCUMENTACIO' => 0.00000000,
                 'TIPO_DESCUENTO1' => 'P',
                 'TIPO_DESCUENTO2' => 'P',
-                'MONTO_DESCUENTO1' => 0.00000000,
+                'MONTO_DESCUENTO1' => $descuento,
                 'MONTO_DESCUENTO2' => 0.00000000,
                 'PORC_DESCUENTO1' => 0.00000000,
                 'PORC_DESCUENTO2' => 0.00000000,
                 'TOTAL_IMPUESTO1' => 0.00000000,
                 'TOTAL_IMPUESTO2' => 0.00000000,
-                'TOTAL_A_FACTURAR' => 0.00000000,
+                'TOTAL_A_FACTURAR' => $total,
                 'PORC_COMI_VENDEDOR' => 0.00000000,
                 'PORC_COMI_COBRADOR' => 0.00000000,
                 'TOTAL_CANCELADO' => 0.00000000,
@@ -70,11 +70,11 @@ class Factura_model extends CI_Model {
                 'DOC_A_GENERAR' => 'F',
                 'CLASE_PEDIDO' => 'N',
                 'MONEDA' => 'L',
-                'NIVEL_PRECIO' => 'CLINICA',
+                'NIVEL_PRECIO' => $nivelprecio,
                 'COBRADOR' => 'ND',
                 'RUTA' => 'EMPL',
                 'USUARIO' => 'SA',
-                'CONDICION_PAGO' => 60,
+                'CONDICION_PAGO' => 0,
                 'BODEGA' => '006',
                 'ZONA' => 'EMPL',
                 'VENDEDOR' => 'ND',
@@ -140,9 +140,9 @@ class Factura_model extends CI_Model {
                 'CONTRATO_VIGENCIA_HASTA' => NULL,
                 'FORMA_PAGO' => NULL,
                 'CLAVE_REFERENCIA_DE' => NULL,
+                'ACTIVIDAD_COMERCIAL' => '851101',
                 'FECHA_REFERENCIA_DE' => NULL
             );
-
             $this->db->insert('hospital.PEDIDO', $data);
 
             $data3 = array(
@@ -152,26 +152,37 @@ class Factura_model extends CI_Model {
             $this->db->update('hospital.Consecutivo_FA', $data3);
             $i = 1;
 
+
             foreach ($productos as $product) {
+                $sql = "select
+                    A.ARTICULO_CUENTA, C.CTR_VENTAS_LOC, CTA_VENTAS_LOC
+                    from
+                    [CAPACITA].[hospital].ARTICULO A inner join [CAPACITA].[hospital].ARTICULO_CUENTA C ON A.ARTICULO_CUENTA = C.ARTICULO_CUENTA
+                    where a.ARTICULO = '" . $product["code"] . "'";
+                $query = $this->db->query($sql);
+                $records = $query->result();
+                $records = $records[0];
+                $impuesto = $this->articulo_model->impuestobyarticulo($product["code"]);
+                $impuestos = $this->articulo_model->impuesto($impuesto);
                 $data4 = array(
                     'PEDIDO' => "PED00" . $id,
                     'PEDIDO_LINEA' => $i,
-                    'BODEGA' => 'ND',
+                    'BODEGA' => $product["bodega"],
                     'LOTE' => NULL,
                     'LOCALIZACION' => NULL,
-                    'ARTICULO' => $product,
-                    'ESTADO' => "F",
+                    'ARTICULO' => $product["code"],
+                    'ESTADO' => "N",
                     'FECHA_ENTREGA' => date('Y-m-d H:i:s'),
                     'LINEA_USUARIO' => $i - 1,
-                    'PRECIO_UNITARIO' => 0.00000000,
-                    'CANTIDAD_PEDIDA' => 1.00000000,
-                    'CANTIDAD_A_FACTURA' => 0.00000000,
-                    'CANTIDAD_FACTURADA' => 1.00000000,
+                    'PRECIO_UNITARIO' => $product["price"],
+                    'CANTIDAD_PEDIDA' => $product["quantity"],
+                    'CANTIDAD_A_FACTURA' => $product["quantity"],
+                    'CANTIDAD_FACTURADA' => 0.00000000,
                     'CANTIDAD_RESERVADA' => 0.00000000,
                     'CANTIDAD_BONIFICAD' => 0.00000000,
                     'CANTIDAD_CANCELADA' => 0.00000000,
                     'TIPO_DESCUENTO' => 'P',
-                    'MONTO_DESCUENTO' => 0.00000000,
+                    'MONTO_DESCUENTO' => $product["discount"],
                     'PORC_DESCUENTO' => 0.00000000,
                     'DESCRIPCION' => '',
                     'COMENTARIO' => '',
@@ -186,10 +197,21 @@ class Factura_model extends CI_Model {
                     'CreatedBy' => '',
                     'UpdatedBy' => '',
                     'CreateDate' => NULL,
-                    'CENTRO_COSTO' => NULL,
-                    'CUENTA_CONTABLE' => NULL,
+                    'CENTRO_COSTO' => $records->CTR_VENTAS_LOC,
+                    'CUENTA_CONTABLE' => $records->CTA_VENTAS_LOC,
                     'RAZON_PERDIDA' => NULL,
-                    'TIPO_DESC' => 0
+                    'TIPO_DESC' => 0,
+                    'PORC_EXONERACION' => 0.00000000,
+                    'MONTO_EXONERACION' => 0.00000000,
+                    'ES_OTRO_CARGO' => 'N',
+                    'ES_CANASTA_BASICA' => 'N',
+                    'PORC_IMPUESTO1' => $impuestos->IMPUESTO1,
+                    'PORC_IMPUESTO2' => $impuestos->IMPUESTO2,
+                    'TIPO_TARIFA1' => $impuestos->TIPO_TARIFA1,
+                    'TIPO_TARIFA1' => $impuestos->TIPO_TARIFA1,
+                    'TIPO_IMPUESTO1' => $impuestos->TIPO_IMPUESTO1,
+                    'TIPO_TARIFA2' => $impuestos->TIPO_TARIFA2,
+                    'TIPO_IMPUESTO2' => $impuestos->TIPO_IMPUESTO2,
                 );
                 $this->db->insert('hospital.PEDIDO_LINEA', $data4);
                 $i++;

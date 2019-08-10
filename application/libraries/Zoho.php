@@ -106,7 +106,6 @@ class Zoho {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/xml/Products/insertRecords";
         $param = "authtoken=" . TOKEN . "&scope=crmapi&newFormat=1&xmlData=" . $xml;
-        echo $param;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -119,6 +118,22 @@ class Zoho {
         return $result;
     }
 
+        function actualizarArticulo($xml) {
+        $token = "AUTHTOKEN";
+        $url = "https://crm.zoho.com/crm/private/xml/Products/updateRecords";
+        $param = "authtoken=" . TOKEN . "&scope=crmapi&newFormat=1&xmlData=" . $xml;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
+    
     function getArticulo($id) {
         $token = "AUTHTOKEN";
         $url = "https://crm.zoho.com/crm/private/json/Products/getRelatedRecords";

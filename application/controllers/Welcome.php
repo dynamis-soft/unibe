@@ -20,112 +20,11 @@ class Welcome extends CI_Controller {
      * @see https://codeigniter.com/user_guide/general/urls.html
      */
     public function index() {
-        //$user = $this->factura_model->getUser();
-        $post = array("id" => "3080805000003050038");
-        $result = $this->zoho->getOportunidad();
-        $result = json_decode($result);
-        $i = 0;
-        $oportunidad = "";
-        foreach ($result->response->result->Deals->row as $item) {
-            foreach ($item as $data) {
-                if (is_array($data)) {
-                    foreach ($data as $key => $object) {
-                        if ($object->val == 'DEALID' && $object->content == $post['id']) {
-                            $oportunidad = $data;
-                        }
-                    }
-                }
-            }
-        }
-
-        $result2 = $this->zoho->getArticulo($post['id']);
-        $result2 = json_decode($result2);
-        $productos = array();
-        foreach ($result2->response->result->Products->row as $item) {
-            print_r($item);
-            foreach ($item as $data) {
-                if (is_array($data)) {
-                    foreach ($data as $key => $object) {
-                        if ($object->val == 'Product Code') {
-                            $productos[]=$object->content;
-                        }
-                    }
-                }
-            }
-        }
-        $id_contacto = "";
-        $profesional = "";
-        die();
-        foreach ($oportunidad as $item) {
-            if ($item->val == 'CONTACTID') {
-                $id_contacto = $item->content;
-            }
-            if ($item->val == 'Profesional') {
-                $profesional = $item->content;
-            }
-        }
-        $result = $this->zoho->buscarContactoJson();
-        $result = json_decode($result);
-        $i = 0;
-        $contacto = "";
-        foreach ($result->response->result->Contacts->row as $item) {
-            foreach ($item as $data) {
-                if (is_array($data)) {
-                    foreach ($data as $key => $object) {
-                        if ($object->val == 'CONTACTID' && $object->content == $id_contacto) {
-                            $contacto = $data;
-                        }
-                    }
-                }
-            }
-        }
-        $nombre = "";
-        $mobile = "";
-        $email = "";
-        $identificacion = "";
-        $docgenerar = "";
-        $GLN = "";
-        $confirma = "";
-        $utiliza = "";
-
-        foreach ($contacto as $item) {
-            if ($item->val == 'Full Name') {
-                $nombre = $item->content;
-            }
-            if ($item->val == 'Phone') {
-                $mobile = " " . $item->content;
-            }
-            if ($item->val == 'Email') {
-                $email = $item->content;
-            }
-            if ($item->val == 'Número de ID') {
-                $identificacion = $item->content;
-            }
-            if ($item->val == 'Número de ID') {
-                $identificacion = " " . $item->content;
-            }
-            if ($item->val == 'Documento a Generar') {
-                $docgenerar = $item->content;
-            }
-            if ($item->val == 'GLN') {
-                $GLN = $item->content;
-            }
-            if ($item->val == 'Confirmación Electrónica') {
-                if ($item->content == "SI") {
-                    $confirma = "S";
-                } else
-                    $confirma = "N";
-            }
-            if ($item->val == 'Utiliza documentos electrónicos') {
-                if ($item->content == "SI") {
-                    $utiliza = "S";
-                } else
-                    $utiliza = "N";
-            }
-        }
-        $this->factura_model->guardarFactura($nombre, $identificacion, $profesional);
-        //$this->contacto_model->guardarContacto($data);
-        $this->load->view('welcome_message');
+        // print_r($this->zohov2->obtenerOportunidadesbyID("3080805000007399293")); //1 modulo
+        //print_r($this->zohov2->obtenerOportunidadbyContacto("3080805000007392170")); // 1modulo obtengo datos de otros
+        print_r($this->zohov2->generarAccessTokenConRefreshToken());
+        // print_r($this->zohov2->obtenerFactura("3080805000007399293"));+
+        
     }
 
 }

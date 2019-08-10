@@ -8,165 +8,38 @@ class Api extends REST_Controller {
 
     function __construct() {
         parent::__construct();
+        if (!($this->zohov2->getEstado())) {
+            $this->errorDeRequest("Hubo un error al iniciar el API de Zoho. Intente de nuevo en un rato.");
+        }
     }
-
-    /* APIS GENERALES */
-    /*
-      public function huli_post() {
-      $data = $this->post();
-
-      $telefonos = "";
-      $home = "";
-      $mobile = "";
-      if (array_key_exists('data', $data)) {
-      foreach ($data['data']['patient']['phones'] as $telefono) {
-      $telefonos .= " Tipo: " . $telefono['type'] . " " . $telefono['number'];
-      if ($telefono['type'] == "home") {
-      $home = $telefono['number'];
-      }
-      if ($telefono['type'] == "mobile") {
-      $mobile = $telefono['number'];
-      }
-      }
-      $enfermedades = "";
-      foreach ($data['data']['patient']['insurances'] as $enfermedad) {
-      $telefonos .= $enfermedad['name'] . " ";
-      }
-      $description = "Usuario :" . 'user ' . $data['data']['user']['name'] . ". Doctor: " . $data['data']['doctor']['name'] .
-      ". Clinica: " . $data['data']['clinic']['name'] . ". Paciente: " . $data['data']['patient']['name'] . " - " . $data['data']['patient']['email']
-      . " - " . $telefonos . ". Motivo: " . $enfermedades;
-      if (array_key_exists("ids", $data['data']['patient'])) {
-      foreach ($data['data']['patient']["ids"] as $item) {
-      if ($item["type"] == "identification") {
-      $result = $this->zoho->buscarContacto();
-      if (strpos($result, $item["number"]) === false) {
-      $xml = '<Contacts>
-      <row no="1">
-      <FL val="First Name"></FL>
-      <FL val="Last Name">' . $data['data']['patient']['name'] . '</FL>
-      <FL val="Email">' . $data['data']['patient']['email'] . '</FL>
-      <FL val="Número de ID">' . $item["number"] . '</FL>
-      <FL val="Phone">' . $home . '</FL>
-      <FL val="Mobile">' . $mobile . '</FL>
-      </row>
-      </Contacts>';
-      $result = $this->zoho->crearContacto($xml);
-      $current_timestamp = date('Y-m-d H:i:s');
-      $this->contacto_model->guardarContacto($data['data']['patient']['name'], $mobile, $current_timestamp, $data['data']['patient']['email'], $item["number"], '0', '00000000000000', 'S', 'S');
-      }
-      }
-      }
-      }
-
-      $xml = '<?xml version="1.0" encoding="utf-8"?>
-      <Deals>
-      <row no = "1">
-      <FL val = "Description">' . $description . '</FL>
-      <FL val = "Stage">Solicitud de Cita</FL>
-      <FL val = "Deal Name">Cita Huli ' . $data['data']['patient']['name'] . '</FL>
-      <FL val = "Contact Name">' . $data['data']['patient']['name'] . '</FL>
-      <FL val = "Closing Date">' . date('d/m/Y') . '</FL>
-      </row>
-      </Deals>';
-      $result = $this->zoho->crearEvento($xml);
-
-
-
-
-      $result = simplexml_load_string($result);
-      $message = [
-      'type' => "success",
-      'message' => "Operacion exitosa",
-      'data' => $result
-      ];
-      } else {
-      $message = [
-      'type' => "error",
-      'message' => "Formato invalido"
-      ];
-      }
-
-
-
-      $this->set_response($message, REST_Controller::HTTP_CREATED);
-      }
-     */
 
     public function facturacion_post() {
         try {
             $post = $this->post();
-            $result = $this->zoho->getOportunidad();
-            $result = json_decode($result);
-            $i = 0;
-            $oportunidad = "";
-            foreach ($result->response->result->Deals->row as $item) {
-                foreach ($item as $data) {
-                    if (is_array($data)) {
-                        foreach ($data as $key => $object) {
-                            if ($object->val == 'DEALID' && $object->content == $post['id']) {
-                                $oportunidad = $data;
-                            }
-                        }
-                    }
-                }
-            }
-            $result2 = $this->zoho->getArticulo($post['id']);
-            $result2 = json_decode($result2);
-            $productos = array();
-            if (!empty($result2->response->result)) {
-                foreach ($result2->response->result->Products->row as $item) {
-                    if (count($result2->response->result->Products->row) > 1) {
-                        foreach ($item as $data) {
-                            if (is_array($data)) {
-                                foreach ($data as $key => $object) {
-                                    if ($object->val == 'Product Code') {
-                                        $productos[] = $object->content;
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        $productos[0] = $result2->response->result->Products->row->FL[4]->content;
-                    }
-                }
-            }
-            $id_contacto = "";
-            $profesional = "";
-            foreach ($oportunidad as $item) {
-                if ($item->val == 'CONTACTID') {
-                    $id_contacto = $item->content;
-                }
-                if ($item->val == 'Profesional') {
-                    $profesional = $item->content;
-                }
-            }
-            $result = $this->zoho->buscarContactoJson();
-            $result = json_decode($result);
-            $i = 0;
-            $contacto = "";
-            foreach ($result->response->result->Contacts->row as $item) {
-                foreach ($item as $data) {
-                    if (is_array($data)) {
-                        foreach ($data as $key => $object) {
-                            if ($object->val == 'CONTACTID' && $object->content == $id_contacto) {
-                                $contacto = $data;
-                            }
-                        }
-                    }
-                }
-            }
-            $nombre = "";
-            $identificacion = "";
+            $deals = $this->zohov2->obtenerInformacion($post['id'], "Deals");
+            $contact = $deals["respuesta"]->data[0]->Contact_Name;
+            $id_contacto = $contact->id;
+            $facturas = $deals["respuesta"]->data[0]->Facturas;
+            $id_facturas = $facturas->id;
+            $profesional = $deals["respuesta"]->data[0]->Profesional;
 
-            foreach ($contacto as $item) {
-                if ($item->val == 'Full Name') {
-                    $nombre = $item->content;
-                }
-                if ($item->val == 'Número de ID') {
-                    $identificacion = $item->content;
-                }
+            $contact = $this->zohov2->obtenerInformacion($id_contacto, "Contacts");
+            $nombre = $contact["respuesta"]->data[0]->Full_Name;
+            $identificacion = $contact["respuesta"]->data[0]->identificacion;
+            $nivelprecio = $contact["respuesta"]->data[0]->Nivel_Precio;
+            $invoices = $this->zohov2->obtenerInformacion($id_facturas, "Invoices");
+            $total = number_format($invoices["respuesta"]->data[0]->Grand_Total, 5, ".", "");
+            $descuento = number_format($invoices["respuesta"]->data[0]->Discount, 5, ".", "");
+            $medico = $invoices["respuesta"]->data[0]->Descuento_M_dico;
+     
+            $productos = array();
+            foreach ($invoices["respuesta"]->data[0]->Product_Details as $product) {
+                $product_search = $this->zohov2->obtenerInformacion($product->product->id, "Products");
+                $productos[] = array("code" => $product->product->Product_Code, "price" => number_format($product->unit_price, 5, ".", ""),
+                    "discount" => number_format($product->Discount, 5, ".", ""), "quantity" => number_format($product->quantity, 5, ".", ""),
+                    "bodega" => $product_search["respuesta"]->data[0]->Bodega);
             }
-            $result = $this->factura_model->guardarFactura($nombre, trim($identificacion), trim($profesional), $productos);
+            $result = $this->factura_model->guardarFactura($nombre, trim($identificacion), trim($profesional), $productos, $descuento, $total, $nivelprecio,$medico);
             if ($result == "1") {
                 $message = [
                     'type' => "success",
@@ -188,113 +61,6 @@ class Api extends REST_Controller {
         $this->set_response($message, REST_Controller::HTTP_CREATED);
     }
 
-    public function contacto_post() {
-        $post = $this->post();
-        $current_timestamp = date('Y-m-d H:i:s');
-        $result = $this->zoho->buscarContactoJson();
-        $result = json_decode($result);
-        $i = 0;
-        $contacto = "";
-        foreach ($result->response->result->Contacts->row as $item) {
-            foreach ($item as $data) {
-                if (is_array($data)) {
-                    foreach ($data as $key => $object) {
-                        if ($object->val == 'CONTACTID' && $object->content == $post['id']) {
-                            $contacto = $data;
-                        }
-                    }
-                }
-            }
-        }
-        $data = array();
-        foreach ($contacto as $item) {
-            if ($item->val == 'Full Name') {
-                $data['nombre'] = $item->content;
-            }
-            if ($item->val == 'Tipo de ID') {
-                $value = explode("-", trim($item->content));
-                $data['tipoIdentificacion'] = $value[0];
-            }
-
-            if ($item->val == 'Phone') {
-                $data['mobile'] = $item->content;
-            }
-            if ($item->val == 'Email') {
-                $data['email'] = $item->content;
-            }
-            if ($item->val == 'Número de ID') {
-                $data['identificacion'] = $item->content;
-            }
-            if ($item->val == 'Documento a Generar') {
-                $data['docgenerar'] = $item->content;
-            }
-            if ($item->val == 'Confirmación Electrónica') {
-                if ($item->content == "SI") {
-                    $data['confirma'] = "S";
-                } else
-                    $data['confirma'] = "N";
-            }
-            if ($item->val == 'Utiliza documentos electrónicos') {
-                if ($item->content == "SI") {
-                    $data['utiliza'] = "S";
-                } else
-                    $data['utiliza'] = "N";
-            }
-            if ($item->val == 'Confirmación Electrónica') {
-                if ($item->content == "SI") {
-                    $data['confirma'] = "S";
-                } else
-                    $data['confirma'] = "N";
-            }
-            if ($item->val == 'Nivel de Precio') {
-                $data['precio'] = $item->content;
-            }
-            if ($item->val == 'Provincia') {
-                $value = explode("-", trim($item->content));
-                $data['provincia'] = $value[0];
-            }
-            if (strpos($item->val, "C-") !== false) {
-                $value = explode("-", trim($item->content));
-                if ((int) $value[0] < 10) {
-                    $data['canton'] = "0" . $value[0];
-                } else {
-                    $data['canton'] = $value[0];
-                }
-                $data['direccion'] = "Detalle: " . $value[1];
-            }
-            if (strpos($item->val, "D-") !== false) {
-                $value = explode("-", trim($item->content));
-                $data['distrito'] = $value[0];
-                if ((int) $value[0] < 10) {
-                    $data['distrito'] = "0" . $value[0];
-                } else {
-                    $data['distrito'] = $value[0];
-                }
-            }
-
-            if (strpos($item->val, "B-") !== false) {
-                $value = explode("-", trim($item->content));
-                $data['barrio'] = $value[0];
-                if ((int) $value[0] < 10) {
-                    $data['barrio'] = "0" . $value[0];
-                } else {
-                    $data['barrio'] = $value[0];
-                }
-            }
-        }
-        if (!in_array("barrio", $data)) {
-            $data['barrio'] = "0";
-        }
-        $data['GLN'] = "0000000000000";
-        $this->contacto_model->guardarContacto($data);
-        $message = [
-            'type' => "success"
-        ];
-
-
-        $this->set_response($message, REST_Controller::HTTP_CREATED);
-    }
-
     public function pedido_post() {
         $post = $this->post();
         $result = $this->factura_model->existeFactura($post['id']);
@@ -303,6 +69,97 @@ class Api extends REST_Controller {
             'cantidad' => $result
         ];
         $this->set_response($message, REST_Controller::HTTP_CREATED);
+    }
+
+    public function contacto_post() {
+        $post = $this->post();
+        $contacts = $this->zohov2->obtenerInformacion($post['id'], "Contacts");
+        $data = array();
+        $data['nombre'] = $contacts["respuesta"]->data[0]->Full_Name;
+        $value = explode("-", trim($contacts["respuesta"]->data[0]->Tipo_de_ID));
+        $data['tipoIdentificacion'] = $value[0];
+        $data['mobile'] = str_replace("(506)", "", $contacts["respuesta"]->data[0]->Mobile);
+        $data['email'] = $contacts["respuesta"]->data[0]->Email;
+
+        $data['identificacion'] = $contacts["respuesta"]->data[0]->identificacion;
+        //$data['docgenerar'] = $contacts["respuesta"]->data[0]->Confirmacion_Electronica;
+        if ($contacts["respuesta"]->data[0]->Confirmacion_Electronica == "SI") {
+            $data['confirma'] = "S";
+        } else
+            $data['confirma'] = "N";
+        if ($contacts["respuesta"]->data[0]->Documentos_Electronicos == "SI") {
+            $data['utiliza'] = "S";
+        } else
+            $data['utiliza'] = "N";
+
+        $data['precio'] = $contacts["respuesta"]->data[0]->Nivel_Precio;
+        $value = explode("-", trim($contacts["respuesta"]->data[0]->PROVINCIA1));
+        $data['provincia'] = $value[0];
+        $data['canton'] = "";
+        $data['distrito'] = "";
+        $data['barrio'] = "";
+        if ($contacts["respuesta"]->data[0]->Impuesto != '') {
+            $value = explode("-", trim($contacts["respuesta"]->data[0]->Impuesto));
+            $data['impuesto'] = $value[0];
+            $impuestos = $this->articulo_model->impuesto($data['impuesto']);
+            $data['codimpuesto'] = $impuestos->IMPUESTO;
+            $data['TIPO_TARIFA1'] = $impuestos->TIPO_TARIFA1;
+            $data['TIPO_IMPUESTO1'] = $impuestos->TIPO_IMPUESTO1;
+            $data['IMPUESTO1'] = $impuestos->IMPUESTO1;
+        } else {
+            $data['codimpuesto'] = NULL;
+            $data['TIPO_TARIFA1'] = NULL;
+            $data['TIPO_IMPUESTO1'] = NULL;
+            $data['IMPUESTO1'] = NULL;
+        }
+
+        $value = explode("-", trim($contacts["respuesta"]->data[0]->Tipo_de_Cliente));
+        $data['tipocliente'] = $value[0];
+        $value = explode("-", trim($contacts["respuesta"]->data[0]->Afectaci_n_del_IVA));
+        $data['iva'] = $value[0];
+        foreach ($contacts["respuesta"]->data[0] as $key => $item) {
+
+            if (strpos($key, "Cantones_") !== false && $item != "") {
+                $value = explode("-", trim($item));
+                if ((int) $value[0] < 10) {
+                    $data['canton'] = "0" . $value[0];
+                } else {
+                    $data['canton'] = $value[0];
+                }
+            }
+            if (strpos($key, "Distrito_Canton_") !== false && $item != "") {
+                $value = explode("-", trim($item));
+                if ((int) $value[0] < 10) {
+                    $data['distrito'] = "0" . $value[0];
+                } else {
+                    $data['distrito'] = $value[0];
+                }
+                $data['direccion'] = $value[1];
+            }
+            if (strpos($key, "Barrio_Distrito") !== false && $item != "") {
+                $value = explode("-", trim($item));
+                if ((int) $value[0] < 10) {
+                    $data['barrio'] = "0" . $value[0];
+                } else {
+                    $data['barrio'] = $value[0];
+                }
+            }
+        }
+
+        $data['GLN'] = "0000000000000";
+        $this->contacto_model->guardarContacto($data);
+        $message = [
+            'type' => "success"
+        ];
+
+
+        $this->set_response($message, REST_Controller::HTTP_CREATED);
+        $response = [
+            'status' => "Success",
+            'message' => "Paciente creado correctamente",
+            'code' => "SUCCESS",
+        ];
+        $this->set_response($response, REST_Controller::HTTP_CREATED);
     }
 
 }

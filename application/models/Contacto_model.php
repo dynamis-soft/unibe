@@ -39,6 +39,8 @@ class Contacto_model extends CI_Model {
                 $id = (int) $id + 1;
                 $sql = "SELECT * FROM hospital.NIT where NIT = '" . $data['identificacion'] . "'";
                 $query = $this->db->query($sql);
+
+
                 if ($query->num_rows() < 1) {
                     $arrayNit = array(
                         'NIT' => $data['identificacion'],
@@ -58,9 +60,23 @@ class Contacto_model extends CI_Model {
                     );
                     $this->db->insert('hospital.NIT', $arrayNit);
                 }
+                $sql = "SELECT TOP (1) DETALLE_DIRECCION cantidad  FROM [CAPACITA].[hospital].[DETALLE_DIRECCION] ORDER BY DETALLE_DIRECCION DESC ";
+                $query = $this->db->query($sql);
+                $id2 = $query->result()[0]->cantidad;
+
+                $arrayDireccion = array(
+                    'DETALLE_DIRECCION' => (int) $id2 + 1,
+                    'DIRECCION' => "ESTANDAR",
+                    'CAMPO_1' => $data['direccion'],
+                    'createdBy' => "FA/SA",
+                    'updatedBy' => "FA/SA"
+                );
+                $this->db->insert('hospital.DETALLE_DIRECCION', $arrayDireccion);
                 $data2 = array(
                     'ZONA' => "CLIE",
-                    'CLASE_DOCUMENTO' => "",
+                    'CLASE_DOCUMENTO' => "N",
+                    'DETALLE_DIRECCION' => $id2,
+                    'CLASE_ABC' => "A",
                     'AJUSTE_FECHA_COBRO' => "",
                     'USAR_EXENCIMP_CORP' => "",
                     'USAR_PRECIOS_CORP' => "",
@@ -101,7 +117,9 @@ class Contacto_model extends CI_Model {
                     'SALDO_DOLAR' => 0,
                     'SALDO_LOCAL' => 0,
                     'SALDO' => 0,
+                    'LOCAL' => 'L',
                     'MONEDA' => "CRC",
+                    'VENDEDOR' => "ND",
                     'MULTIMONEDA' => "S",
                     'CONTRIBUYENTE' => $data['identificacion'],
                     'CARGO' => "",
@@ -121,9 +139,25 @@ class Contacto_model extends CI_Model {
                     'DIVISION_GEOGRAFICA3' => $data['distrito'],
                     'DIVISION_GEOGRAFICA4' => $data['barrio'],
                     'NIVEL_PRECIO' => $data['precio'],
-                    'DIRECCION' => $data['direccion']
+                    'DIRECCION' => $data['direccion'],
+                    'CODIGO_IMPUESTO' => $data['codimpuesto'],
+                    'DIR_EMB_DEFAULT' => "ND",
+                    'AFECTACION_IVA' => $data['iva'],
+                    'TIPIFICACION_CLIENTE' => $data['tipocliente'],
+                    'TIPO_TARIFA' => $data['TIPO_TARIFA1'],
+                    'TIPO_IMPUESTO' => $data['TIPO_IMPUESTO1'],
+                    'PORC_TARIFA' => $data['IMPUESTO1'],
+                    
                 );
                 $this->db->insert('hospital.CLIENTE', $data2);
+                $arrayDireccion2 = array(
+                    'CLIENTE' => "PAC00" . $id,
+                    'DIRECCION' => "ND",
+                    'NoteExistsFlag' => 0,
+                    'createdBy' => "FA/SA",
+                    'updatedBy' => "FA/SA"
+                );
+                $this->db->insert('hospital.DIRECC_EMBARQUE', $arrayDireccion2);
                 $data3 = array(
                     'ULTIMO_VALOR' => "PAC00" . $id
                 );
